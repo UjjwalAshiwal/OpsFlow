@@ -7,7 +7,7 @@ import type { SessionUser } from "@/lib/auth";
 import { canMutate, canRead, type TeamMembershipRole } from "./authz";
 import { teamRole, userTeamIds } from "@/modules/teams";
 import { idempotencyKeySchema } from "./schemas";
-import { checkTransition, type Status } from "./workflow";
+import { checkTransition, type Priority, type Status } from "./workflow";
 
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000; // completed results replay for 24h
 // Claims start PENDING with a short fuse so a crashed/rolled-back request frees
@@ -98,7 +98,7 @@ export interface CreateInput {
   description: string;
   assigneeId?: string | null;
   teamId?: string | null;
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority?: Priority;
 }
 
 function fingerprintFor(input: CreateInput): string {
@@ -215,7 +215,7 @@ export async function pruneExpiredIdempotencyKeys(): Promise<number> {
 
 export interface ListFilters {
   status?: Status;
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority?: Priority;
   q?: string;
   assigneeId?: string;
   creatorId?: string;
@@ -321,7 +321,7 @@ export interface UpdateInput {
   description?: string;
   assigneeId?: string | null;
   teamId?: string | null;
-  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority?: Priority;
 }
 
 export async function updateWorkItem(user: SessionUser, id: string, input: UpdateInput) {
