@@ -1,10 +1,11 @@
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { Prisma } from "@prisma/client";
 import type { User } from "@prisma/client";
 import { db } from "./db";
-import { sha256Hex, verifyPassword } from "./password";
+import { hashPassword, sha256Hex, verifyPassword } from "./password";
 import { ApiError } from "./errors";
-import { loginRateLimiter } from "./rate-limit";
+import { loginRateLimiter, registerRateLimiter } from "./rate-limit";
 
 export const SESSION_COOKIE = "nt_session";
 // 7 days, sliding. Short enough to bound stolen-cookie use, long enough for a demo.
@@ -95,4 +96,47 @@ export async function authenticateUser(
   }
   loginRateLimiter.reset(scope);
   return { id: user.id, email: user.email, name: user.name, role: user.role };
+}
+
+/**
+ * Create an account. The caller-supplied shape intentionally excludes any
+ * global role: `role` is left to Prisma's @default(USER), so this path can
+ * never mint an ADMIN. No team membership is created either — team access is
+ * granted by an existing team LEAD via addMember().
+ */
+export async function registerUser(
+  input: { name: string; email: string; password: string },
+  clientKey: string,
+): Promise<SessionUser> {
+  const scope = `register:${clientKey}`;
+  const verdict = registerRateLimiter.check(scope);
+  if (verdict.limited) {
+    throw new ApiError(429, "RATE_LIMITED", "Too many sign-up attempts. Try again later.", {
+      retryAfterSeconds: verdict.retryAfterSeconds,
+    });
+  }
+  registerRateLimiter.record(scope);
+
+  const email = input.email.toLowerCase();
+  let passwordHash: string;
+  try {
+    passwordHash = await hashPassword(input.password);
+  } catch {
+    // Never let a hashing failure echo the password or the input back out.
+    throw new ApiError(400, "BAD_REQUEST", "Password could not be processed.");
+  }
+
+  try {
+    const user = await db.user.create({
+      data: { name: input.name.trim(), email, passwordHash },
+    });
+    return { id: user.id, email: user.email, name: user.name, role: user.role };
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      // 409, not 400: the address is already registered. The message stays
+      // generic so it reveals nothing beyond what the client submitted.
+      throw new ApiError(409, "EMAIL_TAKEN", "An account with that email already exists.");
+    }
+    throw e;
+  }
 }

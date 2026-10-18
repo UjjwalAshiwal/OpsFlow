@@ -11,6 +11,14 @@ export const loginSchema = z.object({
   password: z.string().min(1).max(256),
 });
 
+// Registration deliberately does NOT accept a role: Prisma's @default(USER)
+// is the only way a global role is ever assigned from this code path.
+export const registerSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(100),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address.").max(255),
+  password: z.string().min(12, "Use at least 12 characters.").max(256),
+});
+
 export const createWorkItemSchema = z.object({
   title: z.string().trim().min(1, "Title is required.").max(200),
   description: z.string().max(5000).default(""),

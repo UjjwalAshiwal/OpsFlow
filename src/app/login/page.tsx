@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, errorMessage } from "@/lib/client";
 import { Button } from "@/components/ui/button";
@@ -132,6 +133,13 @@ export default function LoginPage() {
               {pending ? "Signing in…" : "Sign in"}
             </Button>
           </form>
+
+          <p className="mt-6 text-center text-[13px] text-muted-foreground">
+            No account yet?{" "}
+            <Link href="/register" className="font-semibold text-primary hover:underline">
+              Create one
+            </Link>
+          </p>
 
           {/* Development convenience only. process.env.NODE_ENV is inlined at
               build time, so this block is dropped from production bundles and
