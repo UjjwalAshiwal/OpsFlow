@@ -3,12 +3,6 @@
 A work-item tracker with a controlled workflow, optimistic concurrency, transactional
 activity history, idempotent creation, and resource-level authorization.
 
-> **Provenance.** The original project brief was not available when this was built.
-> The domain model is therefore a documented set of assumptions rather than
-> confirmed requirements. §Domain below and `ENGINEERING_DECISIONS.md` §1 list each
-> assumption with the one file to change if the real specification differs. Nothing
-> here has been verified against a specification.
-
 ## Domain
 
 - **Resource:** `WorkItem` — `title`, `description`, `status`, `priority`
