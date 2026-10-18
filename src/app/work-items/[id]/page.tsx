@@ -236,6 +236,8 @@ function DetailInner() {
         if (!cancelled) failDetail(e);
       },
     );
+    // Editor pickers only; the item and its history have already loaded above
+    // and report their own errors. A failure just means an empty dropdown.
     api<{ users: ApiUser[] }>("/api/users")
       .then((d) => {
         if (!cancelled) setUsers(d.users);

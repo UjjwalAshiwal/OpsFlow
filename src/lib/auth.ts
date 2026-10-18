@@ -8,7 +8,9 @@ import { ApiError } from "./errors";
 import { loginRateLimiter, registerRateLimiter } from "./rate-limit";
 
 export const SESSION_COOKIE = "nt_session";
-// 7 days, sliding. Short enough to bound stolen-cookie use, long enough for a demo.
+// Absolute lifetime, set once when the session is created and never renewed:
+// there is no sliding refresh, so a session dies 7 days after login however
+// active the user is. Short enough to bound stolen-cookie use.
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type SessionUser = Pick<User, "id" | "email" | "name" | "role">;
@@ -70,6 +72,8 @@ export async function getSessionUserByToken(token: string | undefined): Promise<
     include: { user: { select: { id: true, email: true, name: true, role: true } } },
   });
   if (!session || session.expiresAt.getTime() < Date.now()) {
+    // The caller is unauthenticated either way; failing to tidy up the expired
+    // row only leaves it for a later sweep, so it must not mask the result.
     if (session) await db.session.delete({ where: { id: session.id } }).catch(() => {});
     return null;
   }
@@ -88,9 +92,10 @@ export function sessionCookieOptions(expires: Date) {
 
 export { SESSION_TTL_MS };
 
-// A real scrypt hash of a throwaway password. Verifying against it costs the
-// same ~50ms as a genuine check, so unknown-email and wrong-password failures
-// are indistinguishable by timing (no account-enumeration oracle). Not a secret.
+// A real scrypt hash of a throwaway password. Verifying against it runs the
+// same code path as a genuine check, so unknown-email and wrong-password
+// failures are indistinguishable by timing (no account-enumeration oracle).
+// Not a secret.
 const DUMMY_HASH =
   "scrypt$b45b428eec9889410b2f66aaa04cb3b1$9b327e5809381e808212fc0ec0557b7d86e98f87008a23712de9494c87e713ea5337a8553616dc6754efabcfa66009003d150e5967e95bdedaa4293b71d225ba";
 

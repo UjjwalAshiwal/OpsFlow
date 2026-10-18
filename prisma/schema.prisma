@@ -17,7 +17,7 @@ enum Role {
 
 // Team-level roles. LEAD manages the roster and may mutate any item in the
 // team; MEMBER reads team items and mutates only items they created or own.
-// Global ADMIN bypasses all team checks. See ENGINEERING_DECISIONS.md §15.
+// Global ADMIN bypasses all team checks. See ENGINEERING_DECISIONS.md §8.
 enum TeamRole {
   MEMBER
   LEAD

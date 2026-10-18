@@ -57,8 +57,8 @@ export function createRateLimiter({ maxAttempts, windowMs }: RateLimitOptions) {
   };
 }
 
-// 5 failures per 10 minutes per (client, email). Failed logins cost ~50ms of
-// scrypt each, so this caps online guessing far below offline-crack rates.
+// 5 failures per 10 minutes per (client, email). Every failed login still pays
+// a scrypt verification, so this caps online guessing far below offline rates.
 export const loginRateLimiter = createRateLimiter({ maxAttempts: 5, windowMs: 10 * 60 * 1000 });
 
 // Account creation is per-client (not per-email, since the email is the thing

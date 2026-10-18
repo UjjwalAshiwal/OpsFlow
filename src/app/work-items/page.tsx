@@ -124,6 +124,8 @@ function ListInner() {
       (d) => apply(d, 0),
       fail,
     );
+    // Pickers only. A failure leaves the filter empty instead of blocking the
+    // list, which is already reporting its own errors through apply/fail above.
     api<{ users: ApiUser[] }>("/api/users")
       .then((d) => setUsers(d.users))
       .catch(() => {});

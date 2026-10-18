@@ -1,8 +1,8 @@
 import type { WorkItem } from "@prisma/client";
 import type { SessionUser } from "@/lib/auth";
 
-// Resource-level policy (team semantics are task-specified — the original brief
-// is unavailable; see ENGINEERING_DECISIONS.md §15):
+// Resource-level policy. These are the documented assumptions in
+// ENGINEERING_DECISIONS.md §1, detailed in §7 (authorization) and §8 (teams):
 // - Teamless (legacy) items stay visible to every authenticated user, as before.
 // - Team items are visible only to team members (or global ADMIN). Invisible ids
 //   are plain 404s, so no cross-team existence leaks.

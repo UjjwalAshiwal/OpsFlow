@@ -20,8 +20,6 @@ import {
 } from "@/modules/teams";
 
 // Real PostgreSQL, isolated test database.
-// NOTE: every file in this directory shares the one test database, so files
-// run sequentially (fileParallelism: false in vitest.config.mts).
 
 let alice: SessionUser;
 let bob: SessionUser;

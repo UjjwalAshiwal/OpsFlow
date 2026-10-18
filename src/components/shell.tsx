@@ -147,6 +147,8 @@ export function AppShell({ user, children }: { user: ApiUser | null; children: R
   }
 
   async function logout() {
+    // Leave the workspace even if the server-side delete fails: the cookie is
+    // cleared on the response, and staying put on a failed request is worse.
     await api("/api/auth/session", { method: "DELETE" }).catch(() => {});
     router.replace("/login");
     router.refresh();

@@ -13,8 +13,6 @@ import {
 // Runs against a REAL PostgreSQL database. Execute with:
 //   DATABASE_URL="$TEST_DATABASE_URL" npx prisma db push && DATABASE_URL="$TEST_DATABASE_URL" npm run test:integration
 // Mocked-DB tests cannot prove transaction or concurrency guarantees, so there are none here.
-// NOTE: every file in this directory shares the one test database, so files
-// run sequentially (fileParallelism: false in vitest.config.mts).
 
 let alice: SessionUser;
 let bob: SessionUser;

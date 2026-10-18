@@ -35,6 +35,8 @@ export default function NewWorkItemPage() {
 
   useEffect(() => {
     if (user) {
+      // Optional picker data. If either fails the form still submits, and the
+      // server rejects a bad team or assignee with a field error regardless.
       api<{ users: ApiUser[] }>("/api/users")
         .then((d) => setUsers(d.users))
         .catch(() => {});

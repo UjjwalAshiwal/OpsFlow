@@ -5,8 +5,6 @@ import { registerSchema } from "@/modules/work-items/schemas";
 import { assertTestDatabase, resetDb } from "./helpers";
 
 // Real PostgreSQL. Run with DATABASE_URL pointed at the isolated test database.
-// NOTE: every file in this directory shares the one test database, so files
-// run sequentially (fileParallelism: false in vitest.config.mts).
 
 // Each test uses a distinct client key so the per-client registration rate
 // limiter (5/hour) never bleeds between cases.

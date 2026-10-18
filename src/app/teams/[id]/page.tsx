@@ -151,6 +151,8 @@ export default function TeamDetailPage() {
   useEffect(() => {
     if (!user) return;
     fetchTeam().then(apply, fail);
+    // Assignee picker only; the roster and item count come from fetchTeam,
+    // which reports its own failure. A failure here just empties the picker.
     api<{ users: ApiUser[] }>("/api/users")
       .then((d) => setUsers(d.users))
       .catch(() => {});

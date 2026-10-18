@@ -3,8 +3,11 @@ import { promisify } from "node:util";
 
 const scrypt = promisify(nodeScrypt);
 
-// scrypt params: interactive-logon strength, ~50ms per hash. Bumped only if
-// login latency budgets allow; verified hashes stay comparable via the stored params.
+// Cost parameters (key length, and Node's default N/r/p) live here, not in the
+// stored hash — the format is `scrypt$salt$hash`. Raising them would therefore
+// make every existing hash fail to verify and lock out every user; doing that
+// safely needs a rehash-on-login path, which does not exist yet.
+// One scrypt hash costs tens of milliseconds.
 const KEYLEN = 64;
 
 export async function hashPassword(password: string): Promise<string> {

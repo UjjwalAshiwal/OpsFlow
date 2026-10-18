@@ -16,7 +16,7 @@ import type { SessionUser } from "../src/lib/auth";
 //   * Refuses to run against localhost unless --force is passed.
 //   * Requires explicit confirmation (--yes) before writing.
 //   * Touches only records it owns: emails ending @demo.opsflow.invalid, the
-//     two demo team ids, and work items carrying a "demo-seed:" idempotencyKey.
+//     two demo team ids, and work items carrying a "demo-seed-v1-" key.
 //   * Never deletes, truncates, or rewrites anything outside that set.
 //   * Idempotent: every record is reconciled by a stable identifier, so
 //     re-running converges instead of duplicating.
