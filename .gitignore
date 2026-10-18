@@ -91,3 +91,4 @@ next-env.d.ts
 #   prisma/schema.prisma, prisma/migrations/, prisma/seed.ts, prisma/prune.ts
 #   src/test/, src/app/, src/components/, src/lib/, src/modules/
 #   README.md, ENGINEERING_DECISIONS.md, FEATURE_MATRIX.md, .env.example
+.vercel
