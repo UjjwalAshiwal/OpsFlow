@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:demo": "tsx prisma/demo-seed.ts",
     "db:prune": "tsx prisma/prune.ts",
     "test:unit": "vitest run src/test/unit",
     "test:integration": "vitest run src/test/integration",

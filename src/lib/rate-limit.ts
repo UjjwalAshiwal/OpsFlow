@@ -71,3 +71,7 @@ export const loginRateLimiter = createRateLimiter({ maxAttempts: 5, windowMs: 10
 // being chosen) and billed on attempts rather than failures: a tight ceiling
 // keeps this from being used to bulk-create accounts.
 export const registerRateLimiter = createRateLimiter({ maxAttempts: 5, windowMs: 60 * 60 * 1000 });
+
+// Demo entry point: per-client, so one visitor hammering the button cannot
+// exhaust the shared demo session for everyone else.
+export const demoRateLimiter = createRateLimiter({ maxAttempts: 20, windowMs: 10 * 60 * 1000 });

@@ -21,6 +21,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [pending, setPending] = useState(false);
+  const [demoPending, setDemoPending] = useState(false);
+  const [demoError, setDemoError] = useState("");
+
+  async function enterDemo() {
+    setDemoError("");
+    setDemoPending(true);
+    try {
+      await api("/api/auth/demo-login", { method: "POST" });
+      router.replace("/");
+      router.refresh();
+    } catch (err) {
+      setDemoError(errorMessage(err));
+    } finally {
+      setDemoPending(false);
+    }
+  }
 
   // Already signed in: go straight to the workspace (fixes D-09).
   useEffect(() => {
@@ -140,6 +156,35 @@ export default function LoginPage() {
               Create one
             </Link>
           </p>
+
+          {/* Public sample workspace. The visitor gets a session for one fixed,
+              non-admin demo account; no identity is taken from the browser. */}
+          <div className="mt-4 rounded-md border border-border bg-subtle/60 px-3 py-2.5">
+            <p className="text-[13px] font-semibold text-foreground">Just looking around?</p>
+            <p className="mt-1 text-[12px] text-muted-foreground">
+              Explore a sample workspace with two teams, twelve teammates and a live
+              work-item backlog — no account needed.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={demoPending}
+              onClick={enterDemo}
+              className="mt-2.5 h-9 w-full"
+            >
+              {demoPending && <Spinner />}
+              {demoPending ? "Opening demo…" : "Explore demo"}
+            </Button>
+            {demoError && (
+              <p role="alert" className="mt-2 text-[12px] font-medium text-destructive">
+                {demoError}
+              </p>
+            )}
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              The demo account is shared. Anything you change there is visible to other
+              visitors and may be reset at any time.
+            </p>
+          </div>
 
           {/* Development convenience only. process.env.NODE_ENV is inlined at
               build time, so this block is dropped from production bundles and
