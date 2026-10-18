@@ -16,14 +16,6 @@ export const metadata: Metadata = {
   description: "Coordinate operational work, track ownership, and manage workflow states.",
 };
 
-// Session lookup streams in behind Suspense so the static shell (and the
-// special /_not-found route) still prerenders under Cache Components.
-async function Workspace() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  const user = await getSessionUserByToken(token);
-  return user;
-}
-
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`h-full ${geistSans.variable} ${geistMono.variable}`}>
@@ -36,7 +28,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 }
 
+// The session lookup is the only dynamic part of the shell. It streams in
+// behind the Suspense boundary above so the static shell (and the special
+// /_not-found route) still prerenders under Cache Components.
 async function ShellLoader({ children }: { children: React.ReactNode }) {
-  const user = await Workspace();
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const user = await getSessionUserByToken(token);
   return <AppShell user={user}>{children}</AppShell>;
 }
