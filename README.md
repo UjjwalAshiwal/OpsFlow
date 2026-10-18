@@ -76,9 +76,11 @@ text label (never colour alone):
 | `DONE` | `#28634E` | `#E3EEE6` | | `URGENT` | `#A34D45` |
 | `CANCELLED` | `#A34D45` | `#F5E7E4` | | | |
 
-`REVIEW`/`HIGH` are darker than the original art-direction value (`#936A28`,
-4.19:1) so the 11px badge text clears WCAG AA at 4.64:1. `muted-foreground` is
-likewise `#6A6E67` rather than `#777B74` (3.99:1 → 4.81:1).
+Measured against the surface each token actually renders on: body text
+(`#202522` on `#f7f6f2`) is 14.39:1, `muted-foreground` (`#6A6E67`) is 4.81:1, and
+the 11px `REVIEW`/`HIGH` badge text (`#8B6324` on its `#F5EEDC` tint) is 4.64:1
+— all above the 4.5:1 threshold for text. `--border` on `--card` is 1.29:1, below
+the 3:1 for UI component boundaries; see [Known limitations](#known-limitations).
 
 ## Prerequisites
 

@@ -157,8 +157,11 @@ Adopted: Next.js + React (required), Prisma 6, Zod 4 (contracts), Vitest 5 + tsx
 packages underpinning shadcn/ui. Auth, hashing, sessions, icons, toasts, and the
 password hasher use Node stdlib and local code.
 
-Rejected: Auth.js (OAuth machinery unneeded for email+password; scrypt + sessions
-is ~60 lines), CASL or any permission framework (one-rule policy, §7), XState
+Rejected: Auth.js (OAuth machinery is unneeded for email+password; the whole
+authentication module — scrypt hashing, session issue/lookup/destroy, trusted-edge
+client keys for rate limiting, the timing-parity failure path, and registration —
+is ~140 lines of local code with no framework), CASL or any permission framework
+(one-rule policy, §7), XState
 (five-state linear flow), generic audit-log libraries (§6), an icon library
 (§13), and an animation library (CSS transitions only). New deps need a
 justification stronger than "might need it later."
@@ -228,7 +231,7 @@ reasoning generalises:
 - Sessions are DB-backed, so they survive restarts, but there is no rotation or
   revocation UI.
 - Login rate limiting is an in-memory token bucket (5 failures / 10 min per
-  client+email, reset on success), plus ~50ms scrypt cost per attempt. It is
+  client+email, reset on success), plus the scrypt cost of every attempt. It is
   single-process by design; a multi-instance deployment needs a shared store, and
   public exposure wants a CAPTCHA.
 - `updateMany` returns a count, not the row — one extra `findUnique` per mutation

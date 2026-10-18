@@ -43,7 +43,10 @@ items are immutable.
 
 ## 2. Frontend coverage
 
-Every endpoint in §1 except #6-only-as-dropdown has a UI path.
+Every HTTP endpoint in §1 (rows 1–4 and 6–19) has at least one UI caller,
+including the `[id]` routes, which are called through template literals. Rows 5,
+20 and 21 are modules rather than endpoints (`clientKey`, `authz`, `workflow`),
+and rows 22–23 are maintenance scripts, so neither group has a UI.
 
 | Feature | UI | Automated coverage | Notes |
 |---|---|---|---|
