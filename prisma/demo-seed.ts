@@ -194,7 +194,7 @@ async function main() {
   }
 
   // ---- Teams (stable ids give us reconciliation)
-  const teamIds: Record<string, string> = {};
+  // The id a spec refers to IS the row id, so no id lookup map is needed.
   for (const t of [TEAM_A, TEAM_B]) {
     const existing = await db.team.findUnique({ where: { id: t.id } });
     if (existing) {
@@ -204,11 +204,9 @@ async function main() {
       } else {
         counts.teams.unchanged++;
       }
-      teamIds[t.id] = t.id;
     } else {
       await db.team.create({ data: { id: t.id, name: t.name } });
       counts.teams.created++;
-      teamIds[t.id] = t.id;
     }
   }
 
@@ -245,7 +243,7 @@ async function main() {
       counts.items.unchanged++;
       continue;
     }
-    const teamId = teamIds[item.team];
+    const teamId = item.team;
     const teamLead = byEmail.get(ROSTER[item.team].lead)!;
     const actor: SessionUser = { id: teamLead.id, email: teamLead.email, name: teamLead.name, role: teamLead.role };
     const assignee = item.assignee ? byEmail.get(item.assignee) : undefined;
