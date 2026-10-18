@@ -7,6 +7,12 @@
 export const STATUSES = ["OPEN", "IN_PROGRESS", "REVIEW", "DONE", "CANCELLED"] as const;
 export type Status = (typeof STATUSES)[number];
 
+// Pure constants shared by the server (zod schemas) and the client (filter and
+// priority pickers). Kept here, not in schemas.ts, because this module imports
+// nothing and is already pulled into client bundles.
+export const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
+export type Priority = (typeof PRIORITIES)[number];
+
 const EDGES: Record<Status, readonly Status[]> = {
   OPEN: ["IN_PROGRESS", "CANCELLED"],
   IN_PROGRESS: ["REVIEW", "CANCELLED"],
@@ -14,6 +20,9 @@ const EDGES: Record<Status, readonly Status[]> = {
   DONE: [],
   CANCELLED: [],
 };
+
+/** The happy path, in order: the linear spine the stepper visualises. */
+export const HAPPY_PATH = ["OPEN", "IN_PROGRESS", "REVIEW", "DONE"] as const;
 
 export type TransitionCheck =
   | { ok: true; to: Status }

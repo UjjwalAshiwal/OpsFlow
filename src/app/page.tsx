@@ -5,42 +5,20 @@ import { useEffect, useState } from "react";
 import { api, errorMessage, type ApiWorkItem } from "@/lib/client";
 import { formatRelative } from "@/lib/dates";
 import { cn } from "@/lib/utils";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   CardSkeleton,
   ErrorState,
   PageHeader,
-  StatusBadge,
+  STATUS_BAR,
+  STATUS_DOT,
+  STATUS_VARIANT,
+  WorkItemRow,
   useRequireAuth,
 } from "@/components/kit";
 import { Icon, type IconName } from "@/components/icons";
-
-const STATUSES = ["OPEN", "IN_PROGRESS", "REVIEW", "DONE", "CANCELLED"] as const;
-
-type Tone = "open" | "progress" | "review" | "done" | "cancelled";
-const TONE: Record<string, Tone> = {
-  OPEN: "open",
-  IN_PROGRESS: "progress",
-  REVIEW: "review",
-  DONE: "done",
-  CANCELLED: "cancelled",
-};
-const DOT: Record<Tone, string> = {
-  open: "bg-status-open",
-  progress: "bg-status-progress",
-  review: "bg-status-review",
-  done: "bg-status-done",
-  cancelled: "bg-status-cancelled",
-};
-const BAR: Record<Tone, string> = {
-  open: "bg-status-open/60",
-  progress: "bg-status-progress/60",
-  review: "bg-status-review/60",
-  done: "bg-status-done/60",
-  cancelled: "bg-status-cancelled/60",
-};
+import { STATUSES } from "@/modules/work-items/workflow";
 
 interface DashboardData {
   counts: Record<string, number>;
@@ -52,7 +30,7 @@ interface DashboardData {
 
 /** One status total, straight from GET /api/work-items/stats (exact GROUP BY). */
 function StatTile({ status, count, total }: { status: string; count: number; total: number }) {
-  const tone = TONE[status] ?? "slate";
+  const tone = STATUS_VARIANT[status] ?? "open";
   const share = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
     <Link
@@ -61,7 +39,7 @@ function StatTile({ status, count, total }: { status: string; count: number; tot
       aria-label={`${count} items ${status.replace("_", " ").toLowerCase()}`}
     >
       <div className="flex items-center gap-1.5">
-        <span className={cn("size-1.5 rounded-full", DOT[tone])} aria-hidden="true" />
+        <span className={cn("size-1.5 rounded-full", STATUS_DOT[tone])} aria-hidden="true" />
         <span className="text-[11px] font-bold tracking-[0.05em] text-muted-foreground uppercase">
           {status.replace("_", " ")}
         </span>
@@ -71,7 +49,7 @@ function StatTile({ status, count, total }: { status: string; count: number; tot
         <span className="pb-0.5 text-[11px] font-medium text-muted-foreground tabular-nums">{share}%</span>
       </div>
       <div className="h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-        <div className={cn("h-full rounded-full", BAR[tone])} style={{ width: `${Math.max(share, count > 0 ? 4 : 0)}%` }} />
+        <div className={cn("h-full rounded-full", STATUS_BAR[tone])} style={{ width: `${Math.max(share, count > 0 ? 4 : 0)}%` }} />
       </div>
     </Link>
   );
@@ -79,22 +57,15 @@ function StatTile({ status, count, total }: { status: string; count: number; tot
 
 function ItemRow({ item, showAssignee = true }: { item: ApiWorkItem; showAssignee?: boolean }) {
   return (
-    <li>
-      <Link
-        href={`/work-items/${item.id}`}
-        className="flex items-center gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-primary/[0.04]"
-      >
-        <Avatar name={item.assignee?.name ?? item.creator.name} className="size-6 text-[10px]" />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold text-foreground">{item.title}</span>
-          <span className="block truncate text-[12px] text-muted-foreground">
-            {showAssignee ? (item.assignee ? item.assignee.name : "Unassigned") : item.creator.name} ·{" "}
-            {formatRelative(item.updatedAt)}
-          </span>
-        </span>
-        <StatusBadge status={item.status} />
-      </Link>
-    </li>
+    <WorkItemRow
+      item={item}
+      meta={
+        <>
+          {showAssignee ? (item.assignee ? item.assignee.name : "Unassigned") : item.creator.name} ·{" "}
+          {formatRelative(item.updatedAt)}
+        </>
+      }
+    />
   );
 }
 

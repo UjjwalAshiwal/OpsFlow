@@ -12,10 +12,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { getSession, type ApiUser } from "@/lib/client";
+import { getSession, type ApiUser, type ApiWorkItem } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { Icon, type IconName } from "@/components/icons";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge, Dot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -171,10 +173,6 @@ export function PageHeader({
   );
 }
 
-export function SectionTitle({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <h2 className={cn("text-[13px] font-bold tracking-tight text-foreground", className)}>{children}</h2>;
-}
-
 /** Label/value row for detail rails. */
 export function KeyValueRow({
   label,
@@ -215,7 +213,7 @@ export function FilterChip({ label, value, onClear }: { label: string; value: st
 
 type StatusVariant = "open" | "progress" | "review" | "done" | "cancelled";
 
-const STATUS_VARIANT: Record<string, StatusVariant> = {
+export const STATUS_VARIANT: Record<string, StatusVariant> = {
   OPEN: "open",
   IN_PROGRESS: "progress",
   REVIEW: "review",
@@ -224,12 +222,21 @@ const STATUS_VARIANT: Record<string, StatusVariant> = {
 };
 
 /** Dot colour for a status badge — same hue as the badge text, full strength. */
-const STATUS_DOT: Record<StatusVariant, string> = {
+export const STATUS_DOT: Record<StatusVariant, string> = {
   open: "bg-status-open",
   progress: "bg-status-progress",
   review: "bg-status-review",
   done: "bg-status-done",
   cancelled: "bg-status-cancelled",
+};
+
+/** The same hues at reduced strength, for fills and bars behind a status. */
+export const STATUS_BAR: Record<StatusVariant, string> = {
+  open: "bg-status-open/60",
+  progress: "bg-status-progress/60",
+  review: "bg-status-review/60",
+  done: "bg-status-done/60",
+  cancelled: "bg-status-cancelled/60",
 };
 
 /** Priority is a bare label in its own tone, never a filled pill. */
@@ -239,6 +246,35 @@ const PRIORITY_TEXT: Record<string, string> = {
   HIGH: "text-priority-high",
   URGENT: "text-priority-urgent",
 };
+
+/** One work item as a list row: link, avatar, title, caller-supplied meta line.
+ *  `trailing` sits between the text and the status badge (e.g. a priority badge). */
+export function WorkItemRow({
+  item,
+  meta,
+  trailing,
+}: {
+  item: ApiWorkItem;
+  meta?: React.ReactNode;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <li>
+      <Link
+        href={`/work-items/${item.id}`}
+        className="flex items-center gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-primary/[0.04]"
+      >
+        <Avatar name={item.assignee?.name ?? item.creator.name} className="size-6 text-[10px]" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13px] font-semibold text-foreground">{item.title}</span>
+          {meta && <span className="block truncate text-[12px] text-muted-foreground">{meta}</span>}
+        </span>
+        {trailing}
+        <StatusBadge status={item.status} />
+      </Link>
+    </li>
+  );
+}
 
 /** Workflow state: tinted pill + dot + words. */
 export function StatusBadge({ status, className }: { status: string; className?: string }) {

@@ -3,23 +3,13 @@ import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { addMember, createTeam } from "@/modules/teams";
 import type { SessionUser } from "@/lib/auth";
+import { assertTestDatabase, resetDb } from "./helpers";
 
 // Mirrors the reconciliation logic in prisma/demo-seed.ts without touching
 // production: the point of these tests is that the dataset is a pure function
 // of its stable identifiers, so re-running converges instead of duplicating.
 
 const DEMO_DOMAIN = "@demo.opsflow.invalid";
-const KEY = "demo-seed:v1:test-01";
-
-async function resetDb() {
-  await db.activityEvent.deleteMany();
-  await db.idempotencyRecord.deleteMany();
-  await db.session.deleteMany();
-  await db.workItem.deleteMany();
-  await db.teamMembership.deleteMany();
-  await db.team.deleteMany();
-  await db.user.deleteMany();
-}
 
 async function demoUser(email: string): Promise<SessionUser> {
   const u = await db.user.upsert({
@@ -47,9 +37,7 @@ async function seedTeamOnce(id: string, name: string, leadEmail: string, memberE
 let realUser: SessionUser;
 
 beforeEach(async () => {
-  if (!process.env.DATABASE_URL?.includes("test")) {
-    throw new Error("Refusing to run integration tests against a non-test database.");
-  }
+  await assertTestDatabase();
   await resetDb();
   realUser = await demoUser("real.person@not-demo.example");
 });

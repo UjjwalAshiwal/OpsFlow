@@ -1,38 +1,18 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { db } from "@/lib/db";
 import { authenticateUser } from "@/lib/auth";
-import { hashPassword } from "@/lib/password";
 import type { SessionUser } from "@/lib/auth";
 import { createWorkItem, getWorkItemStats, transitionWorkItem } from "@/modules/work-items/service";
+import { assertTestDatabase, makeUser, resetDb } from "./helpers";
 
 // Real PostgreSQL. Run with DATABASE_URL pointed at the isolated test database.
 // NOTE: every file in this directory shares the one test database, so files
 // run sequentially (fileParallelism: false in vitest.config.mts).
 
-async function resetDb() {
-  await db.activityEvent.deleteMany();
-  await db.idempotencyRecord.deleteMany();
-  await db.session.deleteMany();
-  await db.workItem.deleteMany();
-  await db.teamMembership.deleteMany();
-  await db.team.deleteMany();
-  await db.user.deleteMany();
-}
-
-async function makeUser(email: string): Promise<SessionUser> {
-  const u = await db.user.create({
-    data: { email, passwordHash: await hashPassword("password123"), name: email.split("@")[0], role: "USER" },
-  });
-  return { id: u.id, email: u.email, name: u.name, role: u.role };
-}
-
 let alice: SessionUser;
 let bob: SessionUser;
 
 beforeEach(async () => {
-  if (!process.env.DATABASE_URL?.includes("test")) {
-    throw new Error("Refusing to run integration tests against a non-test database.");
-  }
+  await assertTestDatabase();
   await resetDb();
   alice = await makeUser("alice@t.io");
   bob = await makeUser("bob@t.io");

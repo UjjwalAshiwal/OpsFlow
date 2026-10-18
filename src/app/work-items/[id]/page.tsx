@@ -16,7 +16,7 @@ import { formatDateTime, formatRelative } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { useTeamRoster } from "@/lib/use-team-roster";
 import { canMutate } from "@/modules/work-items/authz";
-import { allowedTransitions, isTerminal } from "@/modules/work-items/workflow";
+import { allowedTransitions, HAPPY_PATH, isTerminal, PRIORITIES } from "@/modules/work-items/workflow";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -111,8 +111,8 @@ function Timeline({ events }: { events: ApiActivityEvent[] }) {
 
 /** Visualises the real transition table from modules/work-items/workflow.ts. */
 function WorkflowStepper({ status }: { status: string }) {
-  const path = ["OPEN", "IN_PROGRESS", "REVIEW", "DONE"];
-  const current = path.indexOf(status);
+  const path = HAPPY_PATH;
+  const current = path.indexOf(status as (typeof path)[number]);
   const cancelled = status === "CANCELLED";
   return (
     <ol className="flex items-center gap-1" aria-label={`Workflow state: ${status.replace("_", " ")}`}>
@@ -511,7 +511,7 @@ function DetailInner() {
                         onChange={(e) => setPriority(e.target.value)}
                         disabled={pending}
                       >
-                        {["LOW", "MEDIUM", "HIGH", "URGENT"].map((p) => (
+                        {PRIORITIES.map((p) => (
                           <option key={p} value={p}>
                             {p}
                           </option>

@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Field, FormSection, PageHeader, Spinner, notify, useRequireAuth } from "@/components/kit";
 import { Icon } from "@/components/icons";
+import { PRIORITIES } from "@/modules/work-items/workflow";
 
 
 export default function NewWorkItemPage() {
@@ -73,8 +74,8 @@ export default function NewWorkItemPage() {
             teamId: teamId || null,
             priority,
           }),
+          headers: { "Idempotency-Key": idempotencyKey.current },
         },
-        { "Idempotency-Key": idempotencyKey.current },
       );
       notify("Work item created.");
       router.replace(`/work-items/${d.item.id}`);
@@ -152,7 +153,7 @@ export default function NewWorkItemPage() {
               </Field>
               <Field label="Priority" htmlFor="priority" error={fieldErrors.priority?.[0]}>
                 <Select id="priority" value={priority} onChange={(e) => setPriority(e.target.value)} disabled={pending}>
-                  {["LOW", "MEDIUM", "HIGH", "URGENT"].map((p) => (
+                  {PRIORITIES.map((p) => (
                     <option key={p} value={p}>
                       {p}
                     </option>

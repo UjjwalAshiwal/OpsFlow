@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, errorMessage, type ApiWorkItem } from "@/lib/client";
 import { formatRelative } from "@/lib/dates";
-import { Avatar } from "@/components/ui/avatar";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,30 +13,22 @@ import {
   LoadingPanel,
   PageHeader,
   PriorityBadge,
-  StatusBadge,
+  WorkItemRow,
   useRequireAuth,
 } from "@/components/kit";
 
-
 function Row({ item }: { item: ApiWorkItem }) {
   return (
-    <li>
-      <Link
-        href={`/work-items/${item.id}`}
-        className="flex items-center gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-primary/[0.04]"
-      >
-        <Avatar name={item.assignee?.name ?? item.creator.name} className="size-6 text-[10px]" />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold text-foreground">{item.title}</span>
-          <span className="block truncate text-[12px] text-muted-foreground">
-            {item.team ? `${item.team.name} · ` : ""}
-            {formatRelative(item.updatedAt)} · v{item.version}
-          </span>
-        </span>
-        <PriorityBadge priority={item.priority} className="hidden sm:inline-flex" />
-        <StatusBadge status={item.status} />
-      </Link>
-    </li>
+    <WorkItemRow
+      item={item}
+      meta={
+        <>
+          {item.team ? `${item.team.name} · ` : ""}
+          {formatRelative(item.updatedAt)} · v{item.version}
+        </>
+      }
+      trailing={<PriorityBadge priority={item.priority} className="hidden sm:inline-flex" />}
+    />
   );
 }
 

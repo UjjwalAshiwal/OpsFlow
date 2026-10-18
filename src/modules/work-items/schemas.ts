@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { STATUSES } from "./workflow";
+import { PRIORITIES, STATUSES } from "./workflow";
 
 const statusEnum = z.enum(STATUSES);
 
-export const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
 const priorityEnum = z.enum(PRIORITIES);
 
 export const loginSchema = z.object({

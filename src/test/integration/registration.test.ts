@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { authenticateUser, registerUser } from "@/lib/auth";
 import { registerSchema } from "@/modules/work-items/schemas";
+import { assertTestDatabase, resetDb } from "./helpers";
 
 // Real PostgreSQL. Run with DATABASE_URL pointed at the isolated test database.
 // NOTE: every file in this directory shares the one test database, so files
@@ -16,20 +17,8 @@ function nextClient(): string {
 
 const GOOD = { name: "Ada Lovelace", email: "Ada@Example.COM", password: "correct horse battery" };
 
-async function resetDb() {
-  await db.activityEvent.deleteMany();
-  await db.idempotencyRecord.deleteMany();
-  await db.session.deleteMany();
-  await db.workItem.deleteMany();
-  await db.teamMembership.deleteMany();
-  await db.team.deleteMany();
-  await db.user.deleteMany();
-}
-
 beforeEach(async () => {
-  if (!process.env.DATABASE_URL?.includes("test")) {
-    throw new Error("Refusing to run integration tests against a non-test database.");
-  }
+  await assertTestDatabase();
   await resetDb();
 });
 
