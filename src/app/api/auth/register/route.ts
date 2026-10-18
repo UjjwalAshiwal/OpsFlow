@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/errors";
 import {
+  clientKey,
   createSession,
   registerUser,
   sessionCookieOptions,
@@ -8,12 +9,6 @@ import {
   SESSION_TTL_MS,
 } from "@/lib/auth";
 import { registerSchema } from "@/modules/work-items/schemas";
-
-function clientKey(req: Request): string {
-  const xff = req.headers.get("x-forwarded-for");
-  const ip = xff?.split(",")[0]?.trim();
-  return ip || "local";
-}
 
 /** Public endpoint — no session required. Creates a USER and signs them in. */
 export async function POST(req: Request) {

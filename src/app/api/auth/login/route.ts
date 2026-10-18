@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/errors";
-import { authenticateUser, createSession, sessionCookieOptions, SESSION_COOKIE, SESSION_TTL_MS } from "@/lib/auth";
+import {
+  authenticateUser,
+  clientKey,
+  createSession,
+  sessionCookieOptions,
+  SESSION_COOKIE,
+  SESSION_TTL_MS,
+} from "@/lib/auth";
 import { loginSchema } from "@/modules/work-items/schemas";
-
-function clientKey(req: Request): string {
-  const xff = req.headers.get("x-forwarded-for");
-  const ip = xff?.split(",")[0]?.trim();
-  return ip || "local";
-}
 
 export async function POST(req: Request) {
   try {

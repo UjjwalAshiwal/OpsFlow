@@ -13,6 +13,32 @@ const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type SessionUser = Pick<User, "id" | "email" | "name" | "role">;
 
+/**
+ * Client address used to build rate-limit keys.
+ *
+ * `x-forwarded-for` is client-settable, so on its own an attacker controls the
+ * bucket and the limiter can be bypassed by rotating the header. Vercel
+ * overwrites `x-vercel-forwarded-for` at the edge, so that one cannot be
+ * forged and is preferred here. `x-real-ip` is the other common edge-provided
+ * header. `x-forwarded-for` is only a last resort, and the fallback constant is
+ * intentionally explicit so a missing header is never mistaken for a real IP.
+ */
+export function clientKey(req: Request): string {
+  const xff = req.headers.get("x-forwarded-for");
+  return (
+    req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip")?.trim() ||
+    xff?.split(",")[0]?.trim() ||
+    "unknown"
+  );
+}
+
+/** Human-facing lockout message that tells the user how long to wait. */
+export function rateLimitedMessage(subject: string, retryAfterSeconds: number): string {
+  const minutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+  return `Too many ${subject}. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+}
+
 function hashToken(token: string): string {
   return sha256Hex(`session:${token}`);
 }
@@ -81,7 +107,7 @@ export async function authenticateUser(
   const scope = `login:${clientKey}:${email.toLowerCase()}`;
   const verdict = loginRateLimiter.check(scope);
   if (verdict.limited) {
-    throw new ApiError(429, "RATE_LIMITED", "Too many login attempts. Try again later.", {
+    throw new ApiError(429, "RATE_LIMITED", rateLimitedMessage("login attempts", verdict.retryAfterSeconds), {
       retryAfterSeconds: verdict.retryAfterSeconds,
     });
   }
@@ -111,7 +137,7 @@ export async function registerUser(
   const scope = `register:${clientKey}`;
   const verdict = registerRateLimiter.check(scope);
   if (verdict.limited) {
-    throw new ApiError(429, "RATE_LIMITED", "Too many sign-up attempts. Try again later.", {
+    throw new ApiError(429, "RATE_LIMITED", rateLimitedMessage("sign-up attempts", verdict.retryAfterSeconds), {
       retryAfterSeconds: verdict.retryAfterSeconds,
     });
   }
