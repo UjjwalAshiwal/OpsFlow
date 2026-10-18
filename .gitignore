@@ -1,6 +1,31 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# OpsFlow — ignore rules for Next.js + React + TypeScript + Prisma/PostgreSQL
+# + Vitest + Tailwind/shadcn + Docker Compose, developed on macOS.
+# See https://help.github.com/articles/ignoring-files/ for how ignoring works.
+#
+# Note: ignore rules only affect UNTRACKED files. Anything already tracked
+# stays tracked regardless of these patterns.
 
-# dependencies
+# ---------------------------------------------------------------- environment
+# Real secrets never enter the repository. Only the documented template does.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+!.env.example
+
+# ------------------------------------------------------------------ build output
+# Root-anchored so a source directory named `build/` or `dist/` can never be
+# swallowed by these rules.
+/.next/
+/out/
+/build/
+/dist/
+/.turbo/
+/.vercel/
+
+# ------------------------------------------------------------------- dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,35 +35,59 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
+# ----------------------------------------------------------------------- testing
+/coverage/
+# Playwright/browser artifacts, if ever added
+/test-results/
+/playwright-report/
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# -------------------------------------------------------------------- logs / tmp
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+*.tmp
+*.temp
 
-# env files (real secrets never committed; the template must be)
-.env
-.env.local
-.env.*.local
-!.env.example
+# ------------------------------------------------------- operating system / editors
+# Unanchored on purpose: these are created in any directory.
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+Icon?
+Thumbs.db
 
-# vercel
-.vercel
+# Editor and IDE state (no shared config is tracked in this repo)
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# typescript
+# ----------------------------------------------- local databases / dumps / certs
+# PostgreSQL runs in Docker, so these only match accidental local files
+# (e.g. a stray SQLite file or a pg_dump output).
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
+
+# Local TLS material and private keys — never commit these.
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ------------------------------------------------------------------- typescript
+# Build metadata and Next.js-generated declarations. Real source is tracked.
 *.tsbuildinfo
 next-env.d.ts
+
+# ------------------------------------------------------- intentionally tracked
+# These are part of the deliverable and must never be ignored:
+#   docker-compose.yml, components.json, vitest.config.mts
+#   prisma/schema.prisma, prisma/migrations/, prisma/seed.ts, prisma/prune.ts
+#   src/test/, src/app/, src/components/, src/lib/, src/modules/
+#   README.md, ENGINEERING_DECISIONS.md, FEATURE_MATRIX.md, .env.example
