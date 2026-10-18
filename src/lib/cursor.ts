@@ -5,23 +5,15 @@ export interface PageCursor {
   id: string;
 }
 
-function base64UrlEncode(s: string): string {
-  return Buffer.from(s, "utf8").toString("base64url");
-}
-
-function base64UrlDecode(s: string): string {
-  return Buffer.from(s, "base64url").toString("utf8");
-}
-
 export function encodeCursor(cursor: PageCursor): string {
-  return base64UrlEncode(JSON.stringify(cursor));
+  return Buffer.from(JSON.stringify(cursor), "utf8").toString("base64url");
 }
 
 /** Malformed cursors are a 400, never silently treated as "first page". */
 export function decodeCursor(raw: string): PageCursor {
   let parsed: unknown;
   try {
-    parsed = JSON.parse(base64UrlDecode(raw));
+    parsed = JSON.parse(Buffer.from(raw, "base64url").toString("utf8"));
   } catch {
     throw new ApiError(400, "INVALID_CURSOR", "The pagination cursor is malformed.");
   }

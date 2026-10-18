@@ -15,23 +15,25 @@ export const EMPTY_FILTERS: Filters = { q: "", status: "", priority: "", assigne
 
 export const ME = "mine";
 
+// The five shareable filters. `q` is deliberately absent: it is applied on
+// submit, not per keystroke, so it never round-trips through the URL.
+const URL_KEYS = ["status", "priority", "assignee", "creator", "teamId"] as const;
+
 /** Reads deep-link params (?status=&assignee=mine&teamId=…) into filter state. */
 export function readFilters(params: URLSearchParams): Filters {
-  return {
-    q: params.get("q") ?? "",
-    status: params.get("status") ?? "",
-    priority: params.get("priority") ?? "",
-    assignee: params.get("assignee") ?? "",
-    creator: params.get("creator") ?? "",
-    teamId: params.get("teamId") ?? "",
-  };
+  const filters: Filters = { ...EMPTY_FILTERS, q: params.get("q") ?? "" };
+  for (const key of URL_KEYS) {
+    const value = params.get(key);
+    if (value) filters[key] = value;
+  }
+  return filters;
 }
 
 /** URL params to share/deep-link. `q` is omitted: it is applied on submit, not per keystroke. */
 export function filterParams(f: Filters): URLSearchParams {
   const params = new URLSearchParams();
-  for (const [key, value] of Object.entries({ status: f.status, priority: f.priority, assignee: f.assignee, creator: f.creator, teamId: f.teamId })) {
-    if (value) params.set(key, value);
+  for (const key of URL_KEYS) {
+    if (f[key]) params.set(key, f[key]);
   }
   return params;
 }

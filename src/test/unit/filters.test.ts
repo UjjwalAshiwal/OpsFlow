@@ -23,6 +23,13 @@ describe("work-item filter mapping", () => {
     expect(readFilters(new URLSearchParams(url))).toEqual({ ...f, q: "" });
   });
 
+  it("carries every filter through the URL, and ignores params that are not filters", () => {
+    const f = { ...EMPTY_FILTERS, q: "db", status: "REVIEW", priority: "LOW", assignee: "u1", creator: "u2", teamId: "t3" };
+    expect(readFilters(filterParams(f))).toEqual({ ...f, q: "" });
+    // Unknown params (e.g. a cursor that leaked into the URL) are not filters.
+    expect(readFilters(new URLSearchParams("cursor=abc&page=3"))).toEqual(EMPTY_FILTERS);
+  });
+
   it("resolves 'mine' to the session user in the API query only", () => {
     expect(toQuery({ ...EMPTY_FILTERS, assignee: "mine", creator: "mine" }, U, 10).get("assigneeId")).toBe(U);
     expect(toQuery({ ...EMPTY_FILTERS, creator: "mine" }, U, 10).get("creatorId")).toBe(U);

@@ -14,13 +14,7 @@ export interface RateLimitVerdict {
   retryAfterSeconds: number;
 }
 
-export interface RateLimiter {
-  check(key: string, now?: number): RateLimitVerdict;
-  record(key: string, now?: number): void;
-  reset(key: string): void;
-}
-
-export function createRateLimiter({ maxAttempts, windowMs }: RateLimitOptions): RateLimiter {
+export function createRateLimiter({ maxAttempts, windowMs }: RateLimitOptions) {
   const attempts = new Map<string, { count: number; firstAt: number }>();
 
   function prune(now: number) {

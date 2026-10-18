@@ -29,9 +29,8 @@ import {
 
 import { Icon } from "@/components/icons";
 import { WorkItemsTable } from "@/components/work-items-table";
+import { PRIORITIES, STATUSES } from "@/modules/work-items/workflow";
 
-const STATUSES = ["OPEN", "IN_PROGRESS", "REVIEW", "DONE", "CANCELLED"] as const;
-const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
 const PAGE_SIZE = 10;
 
 interface PageData {
@@ -92,18 +91,22 @@ function ListInner() {
     [user],
   );
 
+  function apply(d: PageData, pageIndex: number) {
+    setData(d);
+    setPage(pageIndex);
+    setState("ready");
+  }
+
+  function fail(e: unknown) {
+    setError(errorMessage(e));
+    setState("error");
+  }
+
   function load(cursor: string | null, f: Filters, pageIndex: number) {
     setState("loading");
     fetchPage(cursor, f).then(
-      (d) => {
-        setData(d);
-        setPage(pageIndex);
-        setState("ready");
-      },
-      (e: unknown) => {
-        setError(errorMessage(e));
-        setState("error");
-      },
+      (d) => apply(d, pageIndex),
+      fail,
     );
   }
 
@@ -118,15 +121,8 @@ function ListInner() {
   useEffect(() => {
     if (!user) return;
     fetchPage(null, readFilters(searchParams)).then(
-      (d) => {
-        setData(d);
-        setPage(0);
-        setState("ready");
-      },
-      (e: unknown) => {
-        setError(errorMessage(e));
-        setState("error");
-      },
+      (d) => apply(d, 0),
+      fail,
     );
     api<{ users: ApiUser[] }>("/api/users")
       .then((d) => setUsers(d.users))

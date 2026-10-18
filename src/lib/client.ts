@@ -13,11 +13,11 @@ export class ClientApiError extends Error {
   }
 }
 
-export async function api<T>(path: string, init?: RequestInit, extraHeaders?: Record<string, string>): Promise<T> {
+export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     credentials: "same-origin",
     ...init,
-    headers: { "Content-Type": "application/json", ...(extraHeaders ?? {}), ...(init?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(init?.headers as Record<string, string> | undefined) },
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
