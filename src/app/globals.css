@@ -1,26 +1,240 @@
 @import "tailwindcss";
 
+/*
+ * OpsFlow design tokens — shadcn/ui convention (CSS variables + `@theme inline`).
+ *
+ * Art direction: warm neutrals + forest green.
+ *   - Surfaces are warm paper greys, never blue-tinted grey.
+ *   - Forest green is reserved for meaningful actions and selected states; it is
+ *     not a background wash.
+ *   - The navigation rail is charcoal-green, not navy.
+ *   - Colour communicates state and hierarchy; structure comes from borders and
+ *     spacing, not from shadows.
+ *
+ * State colour: one hue per state, reused identically in badges, tables, the
+ * workflow stepper, and the activity timeline — always paired with a text label,
+ * never colour alone.
+ *
+ *   OPEN slate-grey-green · IN PROGRESS dusty blue · REVIEW ochre
+ *   DONE forest · CANCELLED brick
+ *   LOW grey-green · MEDIUM slate · HIGH ochre · URGENT brick
+ *
+ * Three values are darker than the art-direction brief because the supplied
+ * ones failed WCAG AA (4.5:1) for the small text they are used at:
+ *   muted-foreground #777B74 (3.99:1) -> #6A6E67 (4.81:1)
+ *   REVIEW         #936A28 (4.19:1) -> #8B6324 (4.64:1)
+ *   warning        #B78132 (3.39:1) -> #9E6820 (4.71:1)
+ *
+ * Root-cause note for the old washed-out UI: the previous stylesheet set
+ * unlayered `body { background/color/font-family }` rules. Unlayered author CSS
+ * wins over Tailwind's `@layer utilities`, so those rules silently overrode
+ * every `bg-*`/`text-*`/`font-sans` class. Tokens now live ONLY in @theme and
+ * surfaces are set with utilities; the product is intentionally light-only
+ * (`color-scheme: light`) so the OS dark mode cannot invert it.
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.5rem;
+
+  /* Surfaces — warm neutral */
+  --background: #f7f6f2;
+  --foreground: #202522;
+  --card: #ffffff;
+  --card-foreground: #202522;
+  --popover: #ffffff;
+  --popover-foreground: #202522;
+  --subtle: #f3f2ec; /* inset panels: table head, quiet strips */
+
+  /* Brand + actions — forest green, used only where something is actionable */
+  --primary: #28634e;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e8efe9; /* selected/active tint for primary controls */
+  --secondary: #eaece6;
+  --secondary-foreground: #202522;
+  --muted: #f0efe9;
+  --muted-foreground: #6a6e67;
+  --accent: #e4ede6;
+  --accent-foreground: #244b3b;
+  --destructive: #b94d42;
+  --destructive-foreground: #ffffff;
+
+  /* Status — text colour + its surface tint */
+  --status-open: #586b60;
+  --status-open-surface: #e9eee9;
+  --status-progress: #476a9c;
+  --status-progress-surface: #e9eff8;
+  --status-review: #8b6324;
+  --status-review-surface: #f5eedc;
+  --status-done: #28634e;
+  --status-done-surface: #e3eee6;
+  --status-cancelled: #a34d45;
+  --status-cancelled-surface: #f5e7e4;
+
+  /* Priority — text only; rendered as a bare label, never a filled pill */
+  --priority-low: #586b60;
+  --priority-medium: #5b6570;
+  --priority-high: #8b6324;
+  --priority-urgent: #a34d45;
+
+  /* Warnings */
+  --warning: #9e6820;
+
+  /* Lines + focus */
+  --border: #e5e2da;
+  --border-strong: #d3d0c5;
+  --input: #d9d8d0;
+  --ring: #477a63;
+
+  /* Navigation rail — charcoal green */
+  --sidebar: #202923;
+  --sidebar-foreground: #e8ece7;
+  --sidebar-muted: #aab5aa;
+  --sidebar-accent: #303d34;
+  --sidebar-accent-foreground: #f2f5f1;
+  --sidebar-border: #36433a;
+  --sidebar-primary: #3f7d5e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-subtle: var(--subtle);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-status-open: var(--status-open);
+  --color-status-open-surface: var(--status-open-surface);
+  --color-status-progress: var(--status-progress);
+  --color-status-progress-surface: var(--status-progress-surface);
+  --color-status-review: var(--status-review);
+  --color-status-review-surface: var(--status-review-surface);
+  --color-status-done: var(--status-done);
+  --color-status-done-surface: var(--status-done-surface);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-surface: var(--status-cancelled-surface);
+
+  --color-priority-low: var(--priority-low);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-high: var(--priority-high);
+  --color-priority-urgent: var(--priority-urgent);
+
+  --color-warning: var(--warning);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-primary: var(--sidebar-primary);
+
+  /* Structure comes from borders, not shadows: one hairline at rest, one lift
+     for overlays only. */
+  --shadow-card: 0 1px 2px rgb(32 37 34 / 0.04);
+  --shadow-raised: 0 1px 2px rgb(32 37 34 / 0.05), 0 2px 6px -2px rgb(32 37 34 / 0.05);
+  --shadow-pop: 0 16px 40px -12px rgb(32 37 34 / 0.2), 0 4px 10px -4px rgb(32 37 34 / 0.08);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Headings keep their inherited colour (some sit on dark surfaces); sizes and
+     weights come from the utilities at each call site. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 20%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Operational data lines up; prose does not. */
+  th,
+  td {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Overlay motion: two keyframes, CSS only (no animation library). Durations are
+   short on purpose — this is a dense operational tool, not a marketing page. */
+@keyframes opsflow-overlay-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes opsflow-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-overlay-in {
+  animation: opsflow-overlay-in 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility animate-fade-in {
+  animation: opsflow-fade-in 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

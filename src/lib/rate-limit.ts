@@ -1,0 +1,68 @@
+// Tiny in-memory token bucket for abuse-sensitive endpoints (currently login).
+// Single-process by design: it bounds casual online guessing on a deployment
+// like this one. A multi-instance deployment must replace it with a shared
+// store (e.g. Redis); the call sites only depend on the small interface below.
+
+export interface RateLimitOptions {
+  maxAttempts: number;
+  windowMs: number;
+}
+
+export interface RateLimitVerdict {
+  limited: boolean;
+  /** Seconds until the window resets. 0 when not limited. */
+  retryAfterSeconds: number;
+}
+
+export interface RateLimiter {
+  check(key: string, now?: number): RateLimitVerdict;
+  record(key: string, now?: number): void;
+  reset(key: string): void;
+}
+
+export function createRateLimiter({ maxAttempts, windowMs }: RateLimitOptions): RateLimiter {
+  const attempts = new Map<string, { count: number; firstAt: number }>();
+
+  function prune(now: number) {
+    if (attempts.size <= 1000) return;
+    for (const [k, v] of attempts) {
+      if (now - v.firstAt > windowMs) attempts.delete(k);
+    }
+  }
+
+  return {
+    check(key: string, now: number = Date.now()): RateLimitVerdict {
+      const entry = attempts.get(key);
+      if (!entry) return { limited: false, retryAfterSeconds: 0 };
+      if (now - entry.firstAt > windowMs) {
+        attempts.delete(key);
+        return { limited: false, retryAfterSeconds: 0 };
+      }
+      if (entry.count >= maxAttempts) {
+        return {
+          limited: true,
+          retryAfterSeconds: Math.max(1, Math.ceil((entry.firstAt + windowMs - now) / 1000)),
+        };
+      }
+      return { limited: false, retryAfterSeconds: 0 };
+    },
+
+    record(key: string, now: number = Date.now()): void {
+      const entry = attempts.get(key);
+      if (!entry || now - entry.firstAt > windowMs) {
+        attempts.set(key, { count: 1, firstAt: now });
+      } else {
+        entry.count += 1;
+      }
+      prune(now);
+    },
+
+    reset(key: string): void {
+      attempts.delete(key);
+    },
+  };
+}
+
+// 5 failures per 10 minutes per (client, email). Failed logins cost ~50ms of
+// scrypt each, so this caps online guessing far below offline-crack rates.
+export const loginRateLimiter = createRateLimiter({ maxAttempts: 5, windowMs: 10 * 60 * 1000 });

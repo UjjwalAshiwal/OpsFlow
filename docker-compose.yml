@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: newtonite-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: newtonite
+      POSTGRES_PASSWORD: newtonite_dev_only
+      POSTGRES_DB: newtonite
+    ports:
+      - "5434:5432"
+    volumes:
+      - newtonite-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U newtonite -d newtonite"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  newtonite-pgdata:
