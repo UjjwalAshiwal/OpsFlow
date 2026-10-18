@@ -133,19 +133,24 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 rounded-md border border-border bg-subtle/60 px-3 py-2.5">
-            <p className="text-[11px] font-bold tracking-[0.05em] text-muted-foreground uppercase">Seeded dev accounts</p>
-            <ul className="mt-1.5 space-y-0.5 text-[12px] text-muted-foreground">
-              {[
-                ["alice@newtonite.local", "alice12345"],
-                ["admin@newtonite.local", "admin12345"],
-              ].map(([mail, pass]) => (
-                <li key={mail}>
-                  <span className="font-semibold text-foreground">{mail}</span> / {pass}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Development convenience only. process.env.NODE_ENV is inlined at
+              build time, so this block is dropped from production bundles and
+              never reaches the production HTML. See README "Deployment safety". */}
+          {process.env.NODE_ENV !== "production" && (
+            <div className="mt-6 rounded-md border border-border bg-subtle/60 px-3 py-2.5">
+              <p className="text-[11px] font-bold tracking-[0.05em] text-muted-foreground uppercase">Seeded dev accounts</p>
+              <ul className="mt-1.5 space-y-0.5 text-[12px] text-muted-foreground">
+                {[
+                  ["alice@newtonite.local", "alice12345"],
+                  ["admin@newtonite.local", "admin12345"],
+                ].map(([mail, pass]) => (
+                  <li key={mail}>
+                    <span className="font-semibold text-foreground">{mail}</span> / {pass}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>

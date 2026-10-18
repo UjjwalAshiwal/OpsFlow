@@ -108,6 +108,33 @@ npm run dev                     # http://localhost:3000
 Dev accounts (seeded, dev-only): `admin@newtonite.local / admin12345`
 (`ADMIN`), `alice@newtonite.local / alice12345`, `bob@newtonite.local / bob12345`.
 
+## Deployment safety
+
+Everything above is **local development only**. Read this before deploying anywhere.
+
+- **The database credentials in `.env.example` and `docker-compose.yml` are
+  development placeholders.** They exist so `docker compose up -d db` works on a
+  laptop. The compose file binds PostgreSQL to `localhost:5434` — do not change
+  that binding to expose it.
+- **Never expose the development database** to a public interface, and never
+  reuse it as a production database. A production deployment needs its own
+  separately provisioned database.
+- **Production must use separately generated credentials.** Create a dedicated
+  database user and a fresh password; do not copy the values from
+  `.env.example` or `docker-compose.yml`.
+- **The seed accounts are for local testing only.** `npm run db:seed` creates
+  `ADMIN`, `alice`, and `bob` with the passwords shown above. Never run the seed
+  against a production database, and delete these accounts before going live.
+  Hiding the credential panel in the login page does not make seeded accounts
+  safe — the accounts and their passwords come from `prisma/seed.ts`.
+- **Real secrets belong in environment variables** supplied by your host or
+  platform's secret manager (Vercel, Docker `--env-file`, Kubernetes Secrets,
+  CI/CD secret stores). Never commit a `.env` file; `.gitignore` already blocks
+  the common ones and deliberately allows only `.env.example`.
+- Before exposing this app publicly, also address the items under
+  [Known limitations](#known-limitations) — notably the in-memory login rate
+  limit, which does not coordinate across instances.
+
 ## Tests
 
 ```bash
@@ -128,7 +155,7 @@ real PostgreSQL. Mocked-DB tests are deliberately absent for those guarantees.
 npm run lint          # ESLint
 npx tsc --noEmit      # typecheck
 npm run build         # production build
-npm start             # serve production build (needs DATABASE_URL + SESSION_SECRET)
+npm start             # serve production build (needs DATABASE_URL)
 npm run db:prune      # delete expired idempotency records (run on a schedule)
 npx prisma migrate deploy   # fresh-DB / CI migration check
 ```
@@ -191,7 +218,7 @@ src/test/integration/  service tests against real PostgreSQL
 ```
 
 Feature-by-feature backend/frontend/test status: `FEATURE_MATRIX.md`.
-Historical pre-teams audit: `OPSFlow_AUDIT_REPORT.md` (superseded).
+Design and engineering rationale: `ENGINEERING_DECISIONS.md`.
 
 Route handlers do auth + validation + serialization only; all business rules live
 in `src/modules/work-items/` and `src/modules/teams.ts`.
